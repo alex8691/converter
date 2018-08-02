@@ -1,0 +1,24 @@
+{
+  "name": "currency_converter",
+  "version": "0.1.0",
+  "private": true,
+  "proxy": "http://localhost:3001",
+  "dependencies": {
+    "react": "^16.4.1",
+    "react-dom": "^16.4.1",
+    "react-scripts": "1.1.4"
+  },
+  "scripts": {
+    "start": "concurrently \"react-scripts start\" \"nodemon ./node_api/server.js\"",
+    "build": "react-scripts build",
+    "test": "react-scripts test --env=jsdom",
+    "eject": "react-scripts eject"
+  },
+  "devDependencies": {
+    "concurrently": "^3.6.1",
+    "ejs": "^2.6.1",
+    "jquery": "^3.3.1",
+    "morgan": "^1.9.0",
+    "nodemon": "^1.18.3"
+  }
+}
