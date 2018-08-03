@@ -37,3 +37,9 @@ a {
   color: #00B7FF;
 }
 
+.errorMsg {
+  color: red;
+  font-size: large;
+  background-color: gray;
+}
+

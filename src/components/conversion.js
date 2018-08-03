@@ -32,6 +32,18 @@ FeesTable.propTypes = {
 }
 
 class Conversion extends Component {
+    constructor(props) {
+        super(props)
+        this.amountInput = null
+        this.setAmountInputRef = element => {
+            this.amountInput = element
+        }
+        this.focusAmountInput = () => {
+            console.log("try focusing")
+            if (this.amountInput) this.amountInput.focus()
+        }
+    }
+
     state = {
         originAmount: '0.00',
         originCurrency: 'USD',
@@ -41,15 +53,17 @@ class Conversion extends Component {
         conversionRate: 1.5,
         totalCost: 0.00,
         error: null,
+        errorMsg: ''
     }
 
     componentDidMount() {
-        this.makeConversion = debounce(this._makeConversion, 350);
-        this.makeFeeCalculation = debounce(this._makeFeeCalculation, 350);
+        this.makeConversion = debounce(this._makeConversion, 350)
+        this.makeFeeCalculation = debounce(this._makeFeeCalculation, 350)
+        this.focusAmountInput()
     }
 
+
     handleCurrencyChange = (current, event) => {
-        console.log("current=" +  current)
         if (current === 'origin') {
             this.setState({ originCurrency: event.target.value })
         } else {
@@ -97,6 +111,15 @@ class Conversion extends Component {
 
     }
 
+    handleErrors = (response) => {
+        if (response.ok) {
+            this.setState({ errorMsg: '' })
+        } else {
+            this.setState({ errorMsg: response.statusText })
+        }
+        return response;
+    }
+
     _makeConversion = (data) => {
         var params = {
             originAmount: data.newValue || this.state.originAmount,
@@ -112,22 +135,18 @@ class Conversion extends Component {
         }
 
         fetch("/api/conversion?" + $.param(params), { method: "GET" })
-            .then(res => res.json())
-            .then(
-                (result) => {
-                    this.setState({
-                        conversionRate: result.xRate,
-                        destinationAmount: result.destAmount,
-                        originAmount: result.originAmount
-                    })
-                },
-                (error) => {
-                    this.setState({
-                        error
-                    })
-                }
-            )
-
+            .then(this.handleErrors)
+            .then(response => response.json())
+            .then(response => {
+                this.setState({
+                    conversionRate: response.xRate,
+                    destinationAmount: response.destAmount,
+                    originAmount: response.originAmount
+                })
+            })
+            .catch(error => {
+                this.setState({ errorMsg: error.message })
+            })
     }
 
     _makeFeeCalculation = (data) => {
@@ -138,28 +157,32 @@ class Conversion extends Component {
         }
 
         fetch("/api/fees?" + $.param(params), { method: "GET" })
-            .then(res => res.json())
-            .then(
-                (result) => {
-                    this.setState({
-                        feeAmount: result.feeAmount,
-                        totalCost: parseFloat(result.feeAmount, 10) + parseFloat(params.originAmount, 10)
-                    })
-                },
-                (error) => {
-                    this.setState({
-                        error
-                    })
-                }
-            )
+            .then(this.handleErrors)
+            .then(response => response.json())
+            .then((response) => {
+                this.setState({
+                    feeAmount: response.feeAmount,
+                    totalCost: parseFloat(response.feeAmount, 10) + parseFloat(params.originAmount, 10)
+                })
+            })
+            .catch(error => {
+                this.setState({ errorMsg: error.message })
+            })
+
 
     }
 
     render() {
+        if (this.state.errorMsg) {
+            var errorMsg = <div className="errorMsg">{this.state.errorMsg}</div>
+        }
+
         return (
             <div>
-                <label>Convert</label>&nbsp;
-            <input ref="originAmountInput"
+                {errorMsg}
+                <label>Convert</label>
+                <input className="amount-field"
+                    ref={this.setAmountInputRef}
                     onChange={this.handleOriginAmountChange}
                     value={this.state.originAmount} />
                 <select ref="originCurrency"
@@ -169,7 +192,9 @@ class Conversion extends Component {
                     <option value="EUR">EUR</option>
                     <option value="JPY">JPY</option>
                 </select>
-                to <input onChange={this.handleDestAmountChange}
+                to <input
+                    className="amountField"
+                    onChange={this.handleDestAmountChange}
                     value={this.state.destinationAmount} />
                 <select ref="destCurrency"
                     value={this.state.destinationCurrency}

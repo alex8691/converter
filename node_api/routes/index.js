@@ -89,8 +89,8 @@ function getRandomResponseTime() {
 // TODO: get some real values here
 // bogus values...
 var xRates = {
-  USD_EUR: 1.5,
-  EUR_USD: 1 / 1.5,
+  USD_EUR: 0.94,
+  EUR_USD: 1 / 0.94,
 
   USD_JPY: 108.81,
   JPY_USD: 1 / 108.81,

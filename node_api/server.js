@@ -7,6 +7,7 @@ var routes = require('./routes/index');
 // change this to something else if port is in use
 const port = 3001;
 var app = express();
+app.disable('etag');
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
